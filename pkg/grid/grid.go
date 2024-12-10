@@ -63,5 +63,5 @@ func (g *Grid) Set(pos Vec2, val int) {
 
 // CheckBounds checks if the given position lies within the grid.
 func (g *Grid) CheckBounds(pos Vec2) bool {
-	return pos.Row < 0 || pos.Row >= g.Size.Row || pos.Col < 0 || pos.Col >= g.Size.Col
+	return pos.Row >= 0 && pos.Row < g.Size.Row && pos.Col >= 0 && pos.Col < g.Size.Col
 }
