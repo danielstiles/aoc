@@ -31,6 +31,12 @@ func (v Vec2) Loc(size Vec2) int {
 	return v.Row*size.Col + v.Col
 }
 
+func fromLoc(loc int, size Vec2) (res Vec2) {
+	res.Col = loc % size.Col
+	res.Row = loc / size.Col
+	return
+}
+
 type Dir int
 
 const (

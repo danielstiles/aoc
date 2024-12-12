@@ -1,6 +1,8 @@
 package grid
 
-import "slices"
+import (
+	"slices"
+)
 
 type Grid struct {
 	Grid []int
@@ -47,7 +49,9 @@ func (g *Grid) Copy() (new *Grid) {
 		Grid: make([]int, len(g.Grid)),
 		Size: g.Size,
 	}
-	copy(g.Grid, new.Grid)
+	for i, val := range g.Grid {
+		new.Grid[i] = val
+	}
 	return
 }
 
