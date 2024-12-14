@@ -69,3 +69,22 @@ func (g *Grid) Set(pos Vec2, val int) {
 func (g *Grid) CheckBounds(pos Vec2) bool {
 	return pos.Row >= 0 && pos.Row < g.Size.Row && pos.Col >= 0 && pos.Col < g.Size.Col
 }
+
+func (g *Grid) Print(key map[int]rune) string {
+	var str string
+	for r := g.Size.Row - 1; r >= 0; r -= 1 {
+		for c := 0; c < g.Size.Col; c += 1 {
+			pos := Vec2{
+				Row: r,
+				Col: c,
+			}
+			if val, ok := key[g.Get(pos)]; ok {
+				str += string(val)
+			} else {
+				str += "?"
+			}
+		}
+		str += "\n"
+	}
+	return str
+}
