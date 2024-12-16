@@ -47,7 +47,7 @@ const (
 	Left    = Dir(8)
 )
 
-var dirVecs = map[Dir]Vec2{
+var DirVecs = map[Dir]Vec2{
 	Up:    Vec2{Row: 1, Col: 0},
 	Right: Vec2{Row: 0, Col: 1},
 	Down:  Vec2{Row: -1, Col: 0},
@@ -86,5 +86,5 @@ func (d Dir) TurnCCW() Dir {
 
 // Move moves the current vector in the given direction len times and returns the result.
 func (v Vec2) Move(d Dir, len int) (new Vec2) {
-	return v.Add(dirVecs[d].Mul(len))
+	return v.Add(DirVecs[d].Mul(len))
 }
