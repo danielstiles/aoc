@@ -9,6 +9,13 @@ type Grid struct {
 	Size Vec2
 }
 
+func New(size Vec2) *Grid {
+	return &Grid{
+		Grid: make([]int, size.Row*size.Col),
+		Size: size,
+	}
+}
+
 // Load takes a list of lines as loaded from a file and converts them to a Grid.
 // The Grid treats the last line as row 0, to represent the top left quadrant of a graph.
 // It will store any values listed in the key in the grid, and stores 0 for any not in the key.
