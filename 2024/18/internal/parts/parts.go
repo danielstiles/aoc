@@ -1,8 +1,6 @@
 package parts
 
 import (
-	"strconv"
-
 	"github.com/danielstiles/aoc/pkg/grid"
 	"github.com/danielstiles/aoc/pkg/parse"
 	"github.com/danielstiles/aoc/pkg/queue"
@@ -53,10 +51,7 @@ func Process2(lines []string) (coord string) {
 		})
 		p := walk(g, paths, end)
 		if p == nil {
-			coord += strconv.Itoa(size.Row - 1 - byteCoords.Row)
-			coord += ","
-			coord += strconv.Itoa(byteCoords.Col)
-			return
+			return line
 		}
 	}
 	return
