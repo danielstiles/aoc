@@ -5,6 +5,7 @@ import (
 
 	"github.com/danielstiles/aoc/pkg/grid"
 	"github.com/danielstiles/aoc/pkg/queue"
+	"github.com/danielstiles/aoc/pkg/search"
 )
 
 var key = map[rune]int{
@@ -49,11 +50,11 @@ func Process2(lines []string) (total int) {
 		cost: 0,
 	})
 	best := walk(m, paths, end)
-	visited := grid.NewPath(g)
+	visited := search.Record(make([]int, g.Size.Row*g.Size.Col))
 	for _, b := range best {
 		curr := start
 		currDir := grid.Right
-		visited.Visit(curr, currDir)
+		visited.Visit(curr.Loc(g.Size), currDir)
 		for _, r := range b.path {
 			switch r {
 			case 'F':
@@ -63,12 +64,13 @@ func Process2(lines []string) (total int) {
 			case 'W':
 				currDir = currDir.TurnCCW()
 			}
-			visited.Visit(curr, currDir)
+			visited.Visit(curr.Loc(g.Size), currDir)
 		}
 	}
 	for i := 0; i < g.Size.Row; i += 1 {
 		for j := 0; j < g.Size.Col; j += 1 {
-			if visited.Get(grid.Vec2{Row: i, Col: j}) > 0 {
+			pos := grid.Vec2{Row: i, Col: j}
+			if visited.Get(pos.Loc(g.Size)) > 0 {
 				total += 1
 			}
 		}

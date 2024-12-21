@@ -4,46 +4,43 @@ import (
 	"strings"
 )
 
-type Step struct {
-	Start    Vec2
-	StartDir Dir
-	Path     string
-	Dest     Vec2
-	DestDir  Dir
-}
-
-func (s Step) Passes(pos Vec2) (Step, bool) {
-	curr := s.Start
-	currDir := s.StartDir
-	traced := ""
-	for _, r := range s.Path {
-		switch r {
-		case 'F':
-			curr = curr.Move(currDir, 1)
-		case 'C':
-			currDir = currDir.TurnCW()
-		case 'W':
-			currDir = currDir.TurnCCW()
-		}
-		traced += string(r)
-		if curr.Row == pos.Row && curr.Col == pos.Col {
-			return Step{
-				Start:    s.Start,
-				StartDir: s.StartDir,
-				Path:     traced,
-				Dest:     curr,
-				DestDir:  currDir,
-			}, true
-		}
-	}
-	return Step{}, false
-}
-
 type Maze struct {
 	Grid    *Grid
 	Blocker int
 
 	MoveMap map[int]map[int]Step
+}
+
+func (m *Maze) Size() Vec2 {
+	return m.Grid.Size
+}
+
+// GetNext returns the next step from pos in direction dir, and whether or not that step is valid.
+// Uses the move map if it has been initialized, otherwise moves one square in the given direciton.
+func (m *Maze) GetNext(pos Vec2, dir Dir, end Vec2) (next Step, ok bool) {
+	if m.MoveMap != nil {
+		s, ok := m.MoveMap[pos.Loc(m.Size())][int(dir)]
+		if !ok {
+			return Step{}, false
+		}
+		endStep, ends := s.Passes(end)
+		if ends {
+			return endStep, true
+		}
+		return s, true
+	}
+	nextPos := pos.Move(dir, 1)
+	if !m.Grid.CheckBounds(nextPos) || m.Grid.Get(nextPos) == m.Blocker {
+		return Step{}, false
+	}
+	return Step{
+		Start:    pos,
+		StartDir: dir,
+		Dest:     nextPos,
+		DestDir:  dir,
+		Len:      1,
+		Path:     string(Forward),
+	}, true
 }
 
 // CalcMoveMap determines how far from each space the maze allows movement in
@@ -58,56 +55,6 @@ func (m *Maze) CalcMoveMap(intersections bool) {
 		m.CalcMoveMapCol(j, intersections)
 	}
 	m.CondenseMap()
-}
-
-// CondenseMap updates the map to follow any passages where there are no choices
-// to be made.
-func (m *Maze) CondenseMap() {
-	newMap := make(map[int]map[int]Step)
-	for loc, dirMap := range m.MoveMap {
-		newMap[loc] = make(map[int]Step)
-		for dir := range dirMap {
-			update := m.follow(loc, dir)
-			if update.Path != "" {
-				newMap[loc][dir] = update
-			}
-		}
-	}
-	m.MoveMap = newMap
-}
-
-func (m *Maze) follow(startLoc, dir int) Step {
-	s := m.MoveMap[startLoc][dir]
-	destLoc := s.Dest.Loc(m.Grid.Size)
-	count := 0
-	var nextDir Dir
-	for d := range DirVecs {
-		if d == s.DestDir.TurnCW().TurnCW() {
-			continue
-		}
-		if _, ok := m.MoveMap[destLoc][int(d)]; ok {
-			count += 1
-			nextDir = d
-		}
-	}
-	if count != 1 {
-		return s
-	}
-	nextStep := m.follow(s.Dest.Loc(m.Grid.Size), int(nextDir))
-	path := s.Path
-	if nextDir == s.DestDir.TurnCW() {
-		path = path + "C"
-	} else if nextDir == s.DestDir.TurnCCW() {
-		path = path + "W"
-	}
-	path += nextStep.Path
-	return Step{
-		Start:    s.Start,
-		StartDir: s.StartDir,
-		Path:     path,
-		Dest:     nextStep.Dest,
-		DestDir:  nextStep.DestDir,
-	}
 }
 
 // CalcMoveMapRow updates the move map for a given row for the Left and Right directions.
@@ -170,6 +117,7 @@ func (m *Maze) CalcMoveMapCol(col int, intersections bool) {
 	}
 }
 
+// updateMap sets the MoveMap for the row, col to forwards len cells
 func (m *Maze) updateMap(row, col, len int, dir Dir) {
 	if len == 0 {
 		return
@@ -182,13 +130,14 @@ func (m *Maze) updateMap(row, col, len int, dir Dir) {
 	m.MoveMap[loc][int(dir)] = Step{
 		Start:    pos,
 		StartDir: dir,
-		Path:     strings.Repeat("F", len),
 		Dest:     pos.Move(dir, len),
 		DestDir:  dir,
+		Len:      len,
+		Path:     strings.Repeat(string(Forward), len),
 	}
 }
 
-// Returns true if the maze has a choice of paths at this point.
+// checkIntersection returns true if the maze has a choice of paths at this point.
 func (m *Maze) checkIntersection(pos Vec2) bool {
 	if m.Grid.Get(pos) == m.Blocker {
 		return false
@@ -206,4 +155,41 @@ func (m *Maze) checkIntersection(pos Vec2) bool {
 		}
 	}
 	return corridors > 2
+}
+
+// CondenseMap updates the map to follow any passages where there are no choices
+// to be made.
+func (m *Maze) CondenseMap() {
+	newMap := make(map[int]map[int]Step)
+	for loc, dirMap := range m.MoveMap {
+		newMap[loc] = make(map[int]Step)
+		for dir := range dirMap {
+			newMap[loc][dir] = m.follow(loc, dir, loc, dir)
+		}
+	}
+	m.MoveMap = newMap
+}
+
+// follow creates a new step from the start position/direction going until it hits
+// a dead end, an intersection, or itself
+func (m *Maze) follow(startLoc, startDir, loc, dir int) Step {
+	s := m.MoveMap[loc][dir]
+	destLoc := s.Dest.Loc(m.Grid.Size)
+	count := 0
+	var nextDir Dir
+	for d := range DirVecs {
+		if d == s.DestDir.TurnCW().TurnCW() {
+			continue
+		}
+		if _, ok := m.MoveMap[destLoc][int(d)]; ok {
+			count += 1
+			nextDir = d
+		}
+	}
+	if count != 1 || (startLoc == destLoc && startDir == int(nextDir)) {
+		return s
+	}
+	nextStep := m.follow(startLoc, startDir, s.Dest.Loc(m.Grid.Size), int(nextDir))
+	nextStep, _ = s.Move(nextStep)
+	return nextStep
 }
