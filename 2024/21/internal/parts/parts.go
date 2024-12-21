@@ -10,9 +10,11 @@ import (
 	"github.com/danielstiles/aoc/pkg/queue"
 )
 
+const A = 10
+
 var numpad = &grid.Grid{
 	Grid: []int{
-		-1, 0, 10,
+		-1, 0, A,
 		1, 2, 3,
 		4, 5, 6,
 		7, 8, 9,
@@ -25,16 +27,14 @@ var numpad = &grid.Grid{
 
 var arrows = &grid.Grid{
 	Grid: []int{
-		12, 13, 14,
-		-1, 11, 10,
+		int(grid.Left), int(grid.Down), int(grid.Right),
+		-1, int(grid.Up), A,
 	},
 	Size: grid.Vec2{
 		Row: 2,
 		Col: 3,
 	},
 }
-
-const A = 10
 
 func getNumpadPos(r rune) grid.Vec2 {
 	switch r {

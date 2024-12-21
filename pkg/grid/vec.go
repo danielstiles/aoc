@@ -1,5 +1,7 @@
 package grid
 
+import "github.com/danielstiles/aoc/pkg/math"
+
 type Vec2 struct {
 	Row int
 	Col int
@@ -31,10 +33,18 @@ func (v Vec2) Loc(size Vec2) int {
 	return v.Row*size.Col + v.Col
 }
 
-func fromLoc(loc int, size Vec2) (res Vec2) {
+// Get the position of a vector in a grid based off its 1D location
+func FromLoc(loc int, size Vec2) (res Vec2) {
 	res.Col = loc % size.Col
 	res.Row = loc / size.Col
 	return
+}
+
+// Get the Manhattan distance from this vector to another
+func (v Vec2) Distance(o Vec2) int {
+	rowDist := math.Abs(v.Row - o.Row)
+	colDist := math.Abs(v.Col - o.Col)
+	return rowDist + colDist
 }
 
 type Dir int
