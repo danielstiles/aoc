@@ -84,8 +84,8 @@ func (s Step) Move(nextStep Step) (next Step, cost int) {
 }
 
 // Needed for BFS interface
-func (s Step) Finish() (cost int, finished Step) {
-	return s.Cost(), s
+func (s Step) Finish() (finished Step, cost int) {
+	return s, s.Cost()
 }
 
 // Needed for BFS interface

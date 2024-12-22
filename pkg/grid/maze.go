@@ -15,32 +15,37 @@ func (m *Maze) Size() Vec2 {
 	return m.Grid.Size
 }
 
-// GetNext returns the next step from pos in direction dir, and whether or not that step is valid.
-// Uses the move map if it has been initialized, otherwise moves one square in the given direciton.
-func (m *Maze) GetNext(pos Vec2, dir Dir, end Vec2) (next Step, ok bool) {
-	if m.MoveMap != nil {
-		s, ok := m.MoveMap[pos.Loc(m.Size())][int(dir)]
-		if !ok {
-			return Step{}, false
+// GetNeighbors returns the next steps from pos. Uses the move map if it has been initialized,
+// otherwise moves one square in the given direciton.
+func (m *Maze) GetNeighbors(pos Vec2, end Vec2) (next []Step) {
+	for dir := range DirVecs {
+		if m.MoveMap != nil {
+			s, ok := m.MoveMap[pos.Loc(m.Size())][int(dir)]
+			if !ok {
+				continue
+			}
+			endStep, ends := s.Passes(end)
+			if ends {
+				next = append(next, endStep)
+				continue
+			}
+			next = append(next, s)
+			continue
 		}
-		endStep, ends := s.Passes(end)
-		if ends {
-			return endStep, true
+		nextPos := pos.Move(dir, 1)
+		if !m.Grid.CheckBounds(nextPos) || m.Grid.Get(nextPos) == m.Blocker {
+			continue
 		}
-		return s, true
+		next = append(next, Step{
+			Start:    pos,
+			StartDir: dir,
+			Dest:     nextPos,
+			DestDir:  dir,
+			Len:      1,
+			Path:     string(Forward),
+		})
 	}
-	nextPos := pos.Move(dir, 1)
-	if !m.Grid.CheckBounds(nextPos) || m.Grid.Get(nextPos) == m.Blocker {
-		return Step{}, false
-	}
-	return Step{
-		Start:    pos,
-		StartDir: dir,
-		Dest:     nextPos,
-		DestDir:  dir,
-		Len:      1,
-		Path:     string(Forward),
-	}, true
+	return
 }
 
 // CalcMoveMap determines how far from each space the maze allows movement in

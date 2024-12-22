@@ -1,41 +1,40 @@
 package search
 
 import (
-	"github.com/danielstiles/aoc/pkg/grid"
 	"github.com/danielstiles/aoc/pkg/queue"
 )
 
-type Arena interface {
-	Size() grid.Vec2
-	GetNext(pos grid.Vec2, dir grid.Dir, end grid.Vec2) (next grid.Step, ok bool)
+type Node[NT any] interface {
+	// Distance should return 0 if equal and not zero otherwise.
+	Distance(other NT) int
 }
 
-type Path[PT any] interface {
-	Pos() grid.Vec2
+type Path[N Node[N], PT any] interface {
+	// Returns the endpoint of the path.
+	Pos() N
+	// Returns the cost of the path.
 	Cost() int
 
-	Move(nextStep grid.Step) (next PT, cost int)
-	Finish() (cost int, finished PT)
+	// Combines this path with nextStep, and returns the resulting path and cost.
+	Move(nextStep PT) (next PT, cost int)
+	// Finish this path, returning the completed path and cost.
+	Finish() (finished PT, cost int)
+	// Check if this path is finished.
 	Finished() bool
 }
 
-type Record []int
-
-func (r Record) Visit(loc int, dir grid.Dir) bool {
-	if r[loc]&int(dir) > 0 {
-		return false
-	}
-	r[loc] |= int(dir)
-	return true
+type Graph[N Node[N], P Path[N, P]] interface {
+	// Returns a slice of all the next paths for the current position.
+	GetNeighbors(pos N, end N) []P
 }
 
-func (r Record) Get(loc int) int {
-	return r[loc]
+type Record[N Node[N], P Path[N, P], G Graph[N, P]] interface {
+	// Record that the endpoint of P has been visited.
+	Visit(g G, curr P) bool
 }
 
-func BFS[A Arena, P Path[P]](a A, start P, end grid.Vec2, all bool) (cost int, best []P) {
+func BFS[N Node[N], P Path[N, P], G Graph[N, P], R Record[N, P, G]](g G, start P, end N, record R, all bool) (cost int, best []P) {
 	var paths queue.PriorityQueue[P]
-	visited := Record(make([]int, a.Size().Row*a.Size().Col))
 	finished := false
 	bestCost := 0
 	paths.Push(0, start)
@@ -54,16 +53,16 @@ func BFS[A Arena, P Path[P]](a A, start P, end grid.Vec2, all bool) (cost int, b
 				best = append(best, curr)
 				continue
 			}
-			nextCost, nextPath := curr.Finish()
+			nextPath, nextCost := curr.Finish()
 			paths.Push(nextCost, nextPath)
 			continue
 		}
-		for dir := range grid.DirVecs {
-			nextStep, ok := a.GetNext(curr.Pos(), dir, end)
-			if !ok || !visited.Visit(nextStep.Dest.Loc(a.Size()), nextStep.DestDir) {
+		neighbors := g.GetNeighbors(curr.Pos(), end)
+		for _, n := range neighbors {
+			if !record.Visit(g, n) {
 				continue
 			}
-			nextPath, nextCost := curr.Move(nextStep)
+			nextPath, nextCost := curr.Move(n)
 			if nextCost != -1 {
 				paths.Push(nextCost, nextPath)
 			}
