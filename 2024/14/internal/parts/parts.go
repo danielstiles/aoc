@@ -4,8 +4,9 @@ import (
 	"os"
 	"regexp"
 	"strconv"
-	"time"
+	"strings"
 
+	"github.com/danielstiles/aoc/pkg/display"
 	"github.com/danielstiles/aoc/pkg/grid"
 )
 
@@ -56,20 +57,19 @@ func Process2(lines []string) (total int) {
 	for _, line := range lines {
 		vals := findAllInt(line)
 		pos := grid.Vec2{
-			Row: vals[1],
+			Row: rows - 1 - vals[1],
 			Col: vals[0],
 		}
 		vel := grid.Vec2{
-			Row: vals[3],
+			Row: -vals[3],
 			Col: vals[2],
 		}
 		robots = append(robots, pos)
 		robotVels = append(robotVels, vel)
 	}
-	round := 0
 	for {
-		round += 1
-		count := 0
+		g := grid.New(grid.Vec2{Row: rows, Col: cols})
+		total += 1
 		for i := range robots {
 			pos := robots[i]
 			vel := robotVels[i]
@@ -82,16 +82,17 @@ func Process2(lines []string) (total int) {
 			if endPos.Col < 0 {
 				endPos.Col += cols
 			}
-			if endPos.Col < (3*cols)/4 && endPos.Col > cols/4 {
-				count += 1
-			}
 			robots[i] = endPos
+			g.Set(endPos, 1)
 		}
-		if count > (len(robots)*3)/4 {
-			display(robots, rows, cols, round)
-			time.Sleep(10 * time.Millisecond)
+		c := strings.Join(display.PrintCondensedGrid(g), "\n")
+		if strings.Count(c, "█") > len(robots)/16 {
+			os.Stdout.WriteString("Round: " + strconv.Itoa(total) + "\n")
+			os.Stdout.WriteString(strings.Join(display.PrintCondensedGrid(g), "\n") + "\n")
+			break
 		}
 	}
+	return
 }
 
 var numRegex = regexp.MustCompile("-?\\d+")
@@ -105,7 +106,7 @@ func findAllInt(line string) (nums []int) {
 	return
 }
 
-func display(robots []grid.Vec2, rows, cols, round int) {
+func show(robots []grid.Vec2, rows, cols, round int) {
 	g := &grid.Grid{
 		Grid: make([]int, rows*cols),
 		Size: grid.Vec2{
@@ -116,10 +117,6 @@ func display(robots []grid.Vec2, rows, cols, round int) {
 	for _, r := range robots {
 		g.Set(r, 1)
 	}
-	key := map[int]rune{
-		0: '.',
-		1: '#',
-	}
 	os.Stdout.WriteString("Round: " + strconv.Itoa(round) + "\n")
-	os.Stdout.WriteString(g.Print(key))
+	os.Stdout.WriteString(strings.Join(display.PrintCondensedGrid(g), "\n") + "\n")
 }
