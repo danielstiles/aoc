@@ -68,8 +68,9 @@ func Process2(lines []string) (total int) {
 		robotVels = append(robotVels, vel)
 	}
 	for {
-		g := grid.New(grid.Vec2{Row: rows, Col: cols})
+		g := grid.New(grid.Vec2{Row: rows/2 + 1, Col: cols/2 + 1})
 		total += 1
+		count := 0
 		for i := range robots {
 			pos := robots[i]
 			vel := robotVels[i]
@@ -83,12 +84,15 @@ func Process2(lines []string) (total int) {
 				endPos.Col += cols
 			}
 			robots[i] = endPos
-			g.Set(endPos, 1)
+			condensedPos := grid.Vec2{Row: endPos.Row / 2, Col: endPos.Col / 2}
+			val := g.Get(condensedPos) + 1
+			g.Set(condensedPos, val)
+			if val >= 4 {
+				count += 1
+			}
 		}
-		c := strings.Join(display.PrintCondensedGrid(g), "\n")
-		if strings.Count(c, "█") > len(robots)/16 {
-			os.Stdout.WriteString("Round: " + strconv.Itoa(total) + "\n")
-			os.Stdout.WriteString(strings.Join(display.PrintCondensedGrid(g), "\n") + "\n")
+		if count > len(robots)/32 {
+			show(robots, rows, cols, total)
 			break
 		}
 	}
