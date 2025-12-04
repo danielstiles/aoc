@@ -1,7 +1,7 @@
-YEAR?=2024
+YEAR?=2025
 DAY?=0
 padded_day=$(shell printf '%02d' $(DAY))
-GO_VERSION?=1.23.3
+GO_VERSION?=1.25.5
 
 new_day:
 	mkdir -p $(YEAR)

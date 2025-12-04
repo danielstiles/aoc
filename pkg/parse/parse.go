@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-var NumRegex = regexp.MustCompile("-?\\d+")
+var NumRegex = regexp.MustCompile(`-?\d+`)
 
 func FindAllInt(line string) (nums []int) {
 	matches := NumRegex.FindAllString(line, -1)
