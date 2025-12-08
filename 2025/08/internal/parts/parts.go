@@ -27,61 +27,8 @@ type Distance struct {
 func Process1(lines []string) (total int) {
 	process := 1000
 	topN := 3
-	var boxes []Vec3
-	var dists []Distance
-	for _, line := range lines {
-		coords := parse.FindAllInt(line)
-		newBox := Vec3{
-			X: coords[0],
-			Y: coords[1],
-			Z: coords[2],
-		}
-		for i, oldBox := range boxes {
-			dists = append(dists, Distance{
-				Dsquared: newBox.DistanceSquared(oldBox),
-				Box1:     i,
-				Box2:     len(boxes),
-			})
-		}
-		boxes = append(boxes, newBox)
-	}
-	slices.SortFunc(dists, func(a, b Distance) int {
-		if a.Dsquared < b.Dsquared {
-			return -1
-		} else if a.Dsquared == b.Dsquared {
-			return 0
-		}
-		return 1
-	})
-	circuits := make([]int, len(boxes)) // 0 indicates a circuit of length 1
-	maxCircuit := 0
-	for i := range process {
-		conn := dists[i]
-		c1 := circuits[conn.Box1]
-		c2 := circuits[conn.Box2]
-		if c1 == 0 {
-			if c2 == 0 {
-				maxCircuit += 1
-				circuits[conn.Box1] = maxCircuit
-				circuits[conn.Box2] = maxCircuit
-				continue
-			}
-			circuits[conn.Box1] = c2
-			continue
-		}
-		if c2 == 0 {
-			circuits[conn.Box2] = c1
-			continue
-		}
-		if c1 == c2 {
-			continue
-		}
-		for i, circuit := range circuits {
-			if circuit == c2 {
-				circuits[i] = c1
-			}
-		}
-	}
+	boxes, dists := loadBoxes(lines)
+	circuits, maxCircuit, _ := makeCircuits(boxes, dists, process)
 	fullCircuits := make([][]int, maxCircuit+1)
 	for i, circuit := range circuits {
 		if circuit != 0 {
@@ -106,6 +53,13 @@ func Process1(lines []string) (total int) {
 }
 
 func Process2(lines []string) (total int) {
+	boxes, dists := loadBoxes(lines)
+	_, _, conn := makeCircuits(boxes, dists, -1)
+	total = boxes[conn.Box1].X * boxes[conn.Box2].X
+	return
+}
+
+func loadBoxes(lines []string) ([]Vec3, []Distance) {
 	var boxes []Vec3
 	var dists []Distance
 	for _, line := range lines {
@@ -132,12 +86,17 @@ func Process2(lines []string) (total int) {
 		}
 		return 1
 	})
-	circuits := make([]int, len(boxes)) // 0 indicates a circuit of length 1
-	maxCircuit := 0
+	return boxes, dists
+}
+
+func makeCircuits(boxes []Vec3, dists []Distance, maxProcess int) (circuits []int, maxCircuit int, conn Distance) {
+	circuits = make([]int, len(boxes)) // 0 indicates a circuit of length 1
 	boxesFound := 0
 	numCircuits := 0
-	var conn Distance
 	for pos := 0; boxesFound != len(boxes) || numCircuits != 1; pos++ {
+		if maxProcess != -1 && pos >= maxProcess {
+			break
+		}
 		conn = dists[pos]
 		c1 := circuits[conn.Box1]
 		c2 := circuits[conn.Box2]
@@ -169,6 +128,5 @@ func Process2(lines []string) (total int) {
 			}
 		}
 	}
-	total = boxes[conn.Box1].X * boxes[conn.Box2].X
 	return
 }
