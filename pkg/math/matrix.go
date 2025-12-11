@@ -34,7 +34,7 @@ func (m *Matrix) Set(row, col, val int) {
 func (m *Matrix) GetCol(col int) []int {
 	vals := make([]int, m.Rows)
 	for row := range vals {
-		vals[i] = m.Get(row, col)
+		vals[row] = m.Get(row, col)
 	}
 	return vals
 }
@@ -50,7 +50,7 @@ func (m *Matrix) SetCol(col int, vals []int) {
 func (m *Matrix) GetRow(row int) []int {
 	vals := make([]int, m.Cols)
 	for col := range vals {
-		vals[i] = m.Get(row, col)
+		vals[col] = m.Get(row, col)
 	}
 	return vals
 }
@@ -85,10 +85,17 @@ func (m *Matrix) AddRow(from, to, scale int) {
 	}
 }
 
-// Solve reduces the matrix to row echelon form, transforming the right hand side and returning it.
-func (m *Matrix) RowEchelon(rhs []int) []int {
+// Solve reduces the matrix to reduced row echelon form (except scale factors), transforming the right hand side and returning it.
+func (m *Matrix) Solve(rhs []int) []int {
 	res := make([]int, len(rhs))
 	copy(res, rhs)
+	m.rowEchelon(res)
+	m.eliminate(res)
+	return res
+}
+
+// rowElechon reduces the matrix to row echelon form, modifying res in place.
+func (m *Matrix) rowEchelon(res []int) {
 	for i := 0; i < m.Rows; i++ {
 		if m.Get(i, i) == 0 {
 			for swapRow := i + 1; m.Get(i, i) == 0 && swapRow < m.Rows; swapRow++ {
@@ -96,14 +103,33 @@ func (m *Matrix) RowEchelon(rhs []int) []int {
 				res[i], res[swapRow] = res[swapRow], res[i]
 			}
 		}
+		if m.Get(i, i) == 0 {
+			continue
+		}
 		for j := 0; j < m.Rows; j++ {
 			if i != j {
+				scale := -m.Get(j, i)
 				m.ScaleRow(j, m.Get(i, i))
 				res[j] *= m.Get(i, i)
-				m.AddRow(i, j, -m.Get(j, i))
-				res[j] -= res[i] * m.Get(j, i)
+				m.AddRow(i, j, scale)
+				res[j] += res[i] * scale
 			}
 		}
 	}
-	return res
+}
+
+// eleminate reduces a row echelon form matrix to reduced row echelon form (besides scale factors),	modifying res in place.
+func (m *Matrix) eliminate(res []int) {
+	for i := m.Rows - 1; i >= 0; i-- {
+		if m.Get(i, i) == 0 {
+			continue
+		}
+		for j := i - 1; j >= 0; j-- {
+			scale := -m.Get(j, i)
+			m.ScaleRow(j, m.Get(i, i))
+			res[j] *= m.Get(i, i)
+			m.AddRow(i, j, scale)
+			res[j] += res[i] * scale
+		}
+	}
 }
