@@ -107,7 +107,7 @@ func (m *Matrix) rowEchelon(res []int) {
 			continue
 		}
 		for j := 0; j < m.Rows; j++ {
-			if i != j {
+			if i != j && m.Get(j, i) != 0 {
 				gcd := GCD(m.Get(j, i), m.Get(i, i))
 				scaleNum := -m.Get(j, i) / gcd
 				scaleDen := m.Get(i, i) / gcd
@@ -127,13 +127,15 @@ func (m *Matrix) eliminate(res []int) {
 			continue
 		}
 		for j := i - 1; j >= 0; j-- {
-			gcd := GCD(m.Get(j, i), m.Get(i, i))
-			scaleNum := -m.Get(j, i) / gcd
-			scaleDen := m.Get(i, i) / gcd
-			m.ScaleRow(j, scaleDen)
-			res[j] *= scaleDen
-			m.AddRow(i, j, scaleNum)
-			res[j] += res[i] * scaleNum
+			if i != j && m.Get(j, i) != 0 {
+				gcd := GCD(m.Get(j, i), m.Get(i, i))
+				scaleNum := -m.Get(j, i) / gcd
+				scaleDen := m.Get(i, i) / gcd
+				m.ScaleRow(j, scaleDen)
+				res[j] *= scaleDen
+				m.AddRow(i, j, scaleNum)
+				res[j] += res[i] * scaleNum
+			}
 		}
 	}
 }
