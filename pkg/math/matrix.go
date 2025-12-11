@@ -89,14 +89,30 @@ func (m *Matrix) AddRow(from, to, scale int) {
 func (m *Matrix) Solve(rhs []int) []int {
 	res := make([]int, len(rhs))
 	copy(res, rhs)
+	if m.Rows == 1 {
+		return res
+	}
 	m.rowEchelon(res)
 	m.eliminate(res)
+	for row := 0; row < m.Rows; row++ {
+		changed := false
+		for compRow := row; compRow < m.Rows-1; compRow++ {
+			if m.LeadZeros(compRow) > m.LeadZeros(compRow+1) {
+				m.SwapRows(compRow, compRow+1)
+				res[compRow], res[compRow+1] = res[compRow+1], res[compRow]
+				changed = true
+			}
+		}
+		if !changed {
+			break
+		}
+	}
 	return res
 }
 
 // rowElechon reduces the matrix to row echelon form, modifying res in place.
 func (m *Matrix) rowEchelon(res []int) {
-	for i := 0; i < m.Rows; i++ {
+	for i := 0; i < m.Rows && i < m.Cols; i++ {
 		if m.Get(i, i) == 0 {
 			for swapRow := i + 1; m.Get(i, i) == 0 && swapRow < m.Rows; swapRow++ {
 				m.SwapRows(i, swapRow)
@@ -122,7 +138,7 @@ func (m *Matrix) rowEchelon(res []int) {
 
 // eleminate reduces a row echelon form matrix to reduced row echelon form (besides scale factors),	modifying res in place.
 func (m *Matrix) eliminate(res []int) {
-	for i := m.Rows - 1; i >= 0; i-- {
+	for i := min(m.Rows, m.Cols) - 1; i >= 0; i-- {
 		if m.Get(i, i) == 0 {
 			continue
 		}
@@ -138,4 +154,16 @@ func (m *Matrix) eliminate(res []int) {
 			}
 		}
 	}
+}
+
+// leadZeros finds the number of 0s at the start of the given row.
+func (m *Matrix) LeadZeros(row int) int {
+	num := 0
+	for _, val := range m.GetRow(row) {
+		if val != 0 {
+			break
+		}
+		num += 1
+	}
+	return num
 }
