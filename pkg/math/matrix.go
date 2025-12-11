@@ -1,5 +1,7 @@
 package math
 
+import "github.com/danielstiles/aoc/pkg/math"
+
 type Matrix struct {
 	M    []int
 	Rows int
@@ -108,11 +110,13 @@ func (m *Matrix) rowEchelon(res []int) {
 		}
 		for j := 0; j < m.Rows; j++ {
 			if i != j {
-				scale := -m.Get(j, i)
-				m.ScaleRow(j, m.Get(i, i))
-				res[j] *= m.Get(i, i)
-				m.AddRow(i, j, scale)
-				res[j] += res[i] * scale
+				gcd := math.GCD(m.Get(j, i), m.Get(i, i))
+				scaleNum := -m.Get(j, i) / gcd
+				scaleDen := m.Get(i, i) / gcd
+				m.ScaleRow(j, scaleDen)
+				res[j] *= scaleDen
+				m.AddRow(i, j, scaleNum)
+				res[j] += res[i] * scaleNum
 			}
 		}
 	}
@@ -125,11 +129,13 @@ func (m *Matrix) eliminate(res []int) {
 			continue
 		}
 		for j := i - 1; j >= 0; j-- {
-			scale := -m.Get(j, i)
-			m.ScaleRow(j, m.Get(i, i))
-			res[j] *= m.Get(i, i)
-			m.AddRow(i, j, scale)
-			res[j] += res[i] * scale
+			gcd := math.GCD(m.Get(j, i), m.Get(i, i))
+			scaleNum := -m.Get(j, i) / gcd
+			scaleDen := m.Get(i, i) / gcd
+			m.ScaleRow(j, scaleDen)
+			res[j] *= scaleDen
+			m.AddRow(i, j, scaleNum)
+			res[j] += res[i] * scaleNum
 		}
 	}
 }
