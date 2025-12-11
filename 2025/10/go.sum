@@ -1,0 +1,16 @@
+github.com/danielstiles/aoc/pkg v0.0.0-20251209143739-22fd74a23291 h1:02neEK+mZX4Xun48dp5Hnnn3JZp59zKU9RA6H9yXYrQ=
+github.com/danielstiles/aoc/pkg v0.0.0-20251209143739-22fd74a23291/go.mod h1:/LVPIv0q/JkU1dpBrx7hY4tMBHh5xyieRS2/XMXneG4=
+github.com/danielstiles/aoc/pkg v0.0.0-20251210232526-5df73fadd757 h1:65wRNC6cMTtkTWFKbOhmhPah6QjxFvQ2blbBxRktGcs=
+github.com/danielstiles/aoc/pkg v0.0.0-20251210232526-5df73fadd757/go.mod h1:/LVPIv0q/JkU1dpBrx7hY4tMBHh5xyieRS2/XMXneG4=
+github.com/danielstiles/aoc/pkg v0.0.0-20251211002637-53f9c5533dca h1:vgwVRQcYrXpRuRRQCDIZAR0WXH/oVMOoWWZ8agMFjfo=
+github.com/danielstiles/aoc/pkg v0.0.0-20251211002637-53f9c5533dca/go.mod h1:/LVPIv0q/JkU1dpBrx7hY4tMBHh5xyieRS2/XMXneG4=
+github.com/danielstiles/aoc/pkg v0.0.0-20251211004147-1069397f1e98 h1:2DQukgFDNtszhl9R2M9afJY37zwxc/4IjWMNneHcnP4=
+github.com/danielstiles/aoc/pkg v0.0.0-20251211004147-1069397f1e98/go.mod h1:/LVPIv0q/JkU1dpBrx7hY4tMBHh5xyieRS2/XMXneG4=
+github.com/danielstiles/aoc/pkg v0.0.0-20251211004506-df39c2f6c128 h1:tQ82WIjG+idYBB1mcVvTe9y2dkisHqxRafwP4Bu/j00=
+github.com/danielstiles/aoc/pkg v0.0.0-20251211004506-df39c2f6c128/go.mod h1:/LVPIv0q/JkU1dpBrx7hY4tMBHh5xyieRS2/XMXneG4=
+github.com/danielstiles/aoc/pkg v0.0.0-20251211004655-45be01e65c56 h1:oTRSPgf/SLvHg3yeMWNmyphJcPoKVaQJMumcsIPoiDM=
+github.com/danielstiles/aoc/pkg v0.0.0-20251211004655-45be01e65c56/go.mod h1:/LVPIv0q/JkU1dpBrx7hY4tMBHh5xyieRS2/XMXneG4=
+github.com/danielstiles/aoc/pkg v0.0.0-20251211004956-b0f2550b7e84 h1:qWwdeAIb9eXNgvMXuB4qTvX1GmhEObiiNZYnY2A1IoQ=
+github.com/danielstiles/aoc/pkg v0.0.0-20251211004956-b0f2550b7e84/go.mod h1:/LVPIv0q/JkU1dpBrx7hY4tMBHh5xyieRS2/XMXneG4=
+github.com/danielstiles/aoc/pkg v0.0.0-20251211023928-d67d88c7cad1 h1:KnfDrE0X4TqX071vuhLuXXzmSsNGpGoJXDYjXN+CCYw=
+github.com/danielstiles/aoc/pkg v0.0.0-20251211023928-d67d88c7cad1/go.mod h1:/LVPIv0q/JkU1dpBrx7hY4tMBHh5xyieRS2/XMXneG4=
